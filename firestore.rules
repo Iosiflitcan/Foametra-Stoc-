@@ -18,7 +18,7 @@ service cloud.firestore {
 
     // The store reads only which stock account is its catalog source.
     match /storeSettings/{settingId} {
-      allow read: if signedIn() && settingId == 'main';
+      allow read: if settingId == 'main';
       allow write: if isAdmin();
     }
 
@@ -27,17 +27,17 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Signed-in buyers can browse stock. Only the owner admin may change it.
+    // The storefront is public; only the owner admin may change catalog data.
     match /users/{uid}/sizes/{sizeId} {
-      allow read: if signedIn();
+      allow read: if true;
       allow write: if signedIn() && request.auth.uid == uid && isAdmin();
     }
     match /users/{uid}/sizes/{sizeId}/{nested=**} {
-      allow read: if signedIn();
+      allow read: if true;
       allow write: if signedIn() && request.auth.uid == uid && isAdmin();
     }
     match /users/{uid}/fonts/{fontId} {
-      allow read: if signedIn();
+      allow read: if true;
       allow write: if signedIn() && request.auth.uid == uid && isAdmin();
     }
     match /users/{uid}/deletedCharacters/{characterId} {
@@ -61,7 +61,7 @@ service cloud.firestore {
       allow update: if isAdmin() &&
         resource.data.status == 'pending' &&
         request.resource.data.status in ['accepted', 'rejected'];
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
   }
 }
